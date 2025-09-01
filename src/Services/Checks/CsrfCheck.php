@@ -20,10 +20,20 @@ class CsrfCheck
 
         foreach ($bladeFiles as $file) {
             $content = file_get_contents($file);
-            preg_match_all('/<form[^>]*>/i', $content, $matches);
-            foreach ($matches[0] as $formTag) {
-                if (stripos($formTag, '@csrf') === false) {
-                    $issues[] = "Form missing CSRF token in: {$file}";
+            $lines = explode("\n", $content);
+            
+            foreach ($lines as $lineNumber => $line) {
+                if (preg_match('/<form[^>]*>/i', $line)) {
+                    if (stripos($line, '@csrf') === false) {
+                        $issues[] = [
+                            'type' => 'CSRF Protection Missing',
+                            'severity' => 'high',
+                            'message' => 'Form missing CSRF token protection',
+                            'file' => str_replace($this->path . DIRECTORY_SEPARATOR, '', $file),
+                            'line' => $lineNumber + 1,
+                            'recommendation' => 'Add @csrf directive inside the form tag'
+                        ];
+                    }
                 }
             }
         }

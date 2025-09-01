@@ -18,7 +18,14 @@ class OutdatedPackagesCheck
         if (file_exists($composerLock)) {
             $lockData = json_decode(file_get_contents($composerLock), true);
             foreach ($lockData['packages'] ?? [] as $package) {
-                $issues[] = "Package {$package['name']} may be outdated: {$package['version']}";
+                $issues[] = [
+                    'type' => 'Outdated Package',
+                    'severity' => 'low',
+                    'message' => 'Package may be outdated',
+                    'file' => 'composer.lock',
+                    'line' => 1,
+                    'recommendation' => "Update package {$package['name']} from version {$package['version']}"
+                ];
             }
         }
         return $issues;

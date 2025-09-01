@@ -23,7 +23,14 @@ class SensitiveFilesCheck
         $issues = [];
         foreach ($this->files as $file) {
             if (file_exists($this->path . '/' . $file)) {
-                $issues[] = "Sensitive file found: {$file}";
+                $issues[] = [
+                    'type' => 'Sensitive File Exposure',
+                    'severity' => 'high',
+                    'message' => 'Sensitive file found in public directory',
+                    'file' => $file,
+                    'line' => 1,
+                    'recommendation' => 'Move sensitive files outside public directory or add proper access restrictions'
+                ];
             }
         }
         return $issues;

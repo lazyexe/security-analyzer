@@ -1,27 +1,48 @@
-# Laravel Security Analyzer
+# 🔒 Laravel Security Analyzer
 
-**Laravel Security Analyzer** is a package to scan your **Laravel project workspace** and detect potential security issues, including:
+**Scan your Laravel project for security vulnerabilities in seconds!**
 
-* Exposed `.env` file
-* Debug mode enabled / APP\_KEY not set
-* Sensitive files (`composer.lock`, logs, backups)
-* Folders with unsafe permissions
-* Outdated composer packages
-* Potential **SQL Injection** & **XSS**
-* Forms **without CSRF tokens**
+Detects common security issues including:
+
+* 🔓 Exposed `.env` files
+* 🐛 Debug mode enabled / Missing APP_KEY
+* 📁 Sensitive files exposed
+* 🔐 Unsafe folder permissions
+* 📦 Outdated packages with vulnerabilities
+* 💉 Potential SQL Injection & XSS
+* 🛡️ Missing CSRF protection
 
 ---
 
-## Installation
+## ⚡ Quick Installation
 
-1. Create a `packages` folder in your Laravel project root.
-2. Copy the entire `security-analyzer` folder into `packages/`.
-3. Add **PSR-4 autoloading** in `composer.json`:
+**Option 1: Auto Installer (Recommended)**
+
+1. Copy the `security-analyzer` folder to your Laravel project root
+2. Run the installer:
+
+```bash
+php security-analyzer/install.php
+```
+
+**That's it!** The installer will automatically:
+- Create the packages directory
+- Copy files to the right location
+- Update your composer.json
+- Run composer dump-autoload
+- Publish configuration files
+
+**Option 2: Manual Installation**
+
+If you prefer manual setup:
+
+1. Create `packages` folder in your Laravel project root
+2. Copy `security-analyzer` folder into `packages/`
+3. Add to your `composer.json`:
 
 ```json
 "autoload": {
     "psr-4": {
-        "App\\": "app/",
         "SecurityAnalyzer\\": "packages/security-analyzer/src/"
     }
 }
@@ -31,47 +52,40 @@
 
 ```bash
 composer dump-autoload
+php artisan vendor:publish --provider="SecurityAnalyzer\SecurityAnalyzerServiceProvider" --tag=config
 ```
 
 ---
 
-## Register the Service Provider
+## 🚀 Usage
 
-Edit `app/Providers/AppServiceProvider.php`:
+**Basic scan:**
+```bash
+php artisan security:scan
+```
 
-```php
-<?php
+**Advanced options:**
+```bash
+# Scan specific path
+php artisan security:scan --path=/path/to/scan
 
-namespace App\Providers;
+# Generate HTML report
+php artisan security:scan --output=html
 
-use Illuminate\Support\ServiceProvider;
-use SecurityAnalyzer\SecurityAnalyzerServiceProvider;
+# Generate all report formats
+php artisan security:scan --output=all
 
-class AppServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        if (class_exists(SecurityAnalyzerServiceProvider::class)) {
-            $this->app->register(SecurityAnalyzerServiceProvider::class);
-        }
-    }
-
-    public function boot(): void
-    {
-        //
-    }
-}
+# Skip saving report files
+php artisan security:scan --no-report
 ```
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
-Configuration file: `packages/security-analyzer/src/config/security-analyzer.php`
+Edit `config/security-analyzer.php` to customize:
 
 ```php
-<?php
-
 return [
     'report_path' => storage_path('security-report.json'),
     'report_html' => storage_path('security-report.html'),
@@ -81,62 +95,88 @@ return [
         'debug_and_key'      => true,
         'sensitive_files'    => true,
         'folder_permissions' => true,
-        'outdated_packages'  => true,
+        'outdated_packages'  => false, // Disabled by default
         'php_code_risks'     => true,
         'csrf_check'         => true,
     ],
 
     'exclude_dirs' => [
-        'bootstrap',
-        'node_modules',
-        'packages',
-        'tests',
-        'vendor',
+        'bootstrap', 'node_modules', 'packages', 'tests', 'vendor',
     ],
 
     'exclude_files' => [
-        '*.log',
-        '*.tmp',
+        '*.log', '*.tmp',
     ],
 ];
 ```
 
 ---
 
-## Usage
+## 📊 Sample Output
 
-Run the artisan command:
-
-```bash
-php artisan security:scan --path=./
 ```
+🔒 Laravel Security Analyzer
+================================
+📁 Scanning path: /path/to/your/project
 
-> Output:
-> *JSON:* `storage/security-report.json`
-> *HTML:* `storage/security-report.html`
+🔍 Running security checks...
+████████████████████████████████████████ 100%
+
+⚠️  Found 3 security issue(s):
+
+🚨 Environment Issues (2 issue(s))
+   • .env file is publicly accessible
+     📄 File: .env
+     💡 Fix: Move .env file outside public directory
+
+   • Debug mode is enabled in production
+     📄 File: .env
+     💡 Fix: Set APP_DEBUG=false in production
+
+🚨 File Permissions (1 issue(s))
+   • Storage directory has unsafe permissions
+     📄 File: storage/
+     💡 Fix: Set permissions to 755
+
+💾 Saving reports...
+📄 Backup JSON report saved: /storage/security-report.json
+```
 
 ---
 
-## Packages Folder Structure
+## 🎯 Features
 
-```
-packages/security-analyzer/
-├── src/
-│   ├── Commands/
-│   │   └── ScanSecurity.php             # Artisan command to run the scan
-│   ├── Services/
-│   │   ├── SecurityScanner.php          # Main scanner orchestrator
-│   │   └── Checks/
-│   │       ├── EnvFileCheck.php
-│   │       ├── DebugAndKeyCheck.php
-│   │       ├── SensitiveFilesCheck.php
-│   │       ├── FolderPermissionsCheck.php
-│   │       ├── OutdatedPackagesCheck.php
-│   │       └── PhpCodeRiskCheck.php
-│   ├── config/
-│   │   └── security-analyzer.php        # Configuration file
-│   └── SecurityAnalyzerServiceProvider.php
-├── composer.json                        # Optional, if using as standalone package
-└── README.md                            # Usage instructions
+- **🚀 Zero Configuration**: Works out of the box with sensible defaults
+- **📱 Multiple Output Formats**: Console, JSON, and HTML reports
+- **🎨 Beautiful Reports**: Color-coded console output and styled HTML reports
+- **⚡ Fast Scanning**: Optimized for large Laravel projects
+- **🔧 Customizable**: Easily configure which checks to run
+- **📦 Laravel Integration**: Native Artisan command support
+- **🔄 Auto-Discovery**: Automatically registers with Laravel
 
-```
+---
+
+## 🛠️ Requirements
+
+- PHP >= 8.2
+- Laravel >= 12.0
+
+---
+
+## 📝 License
+
+This package is open-sourced software licensed under the [MIT license](LICENSE).
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📞 Support
+
+If you encounter any issues or have questions, please open an issue on the repository.
+
+**Happy securing! 🔒**

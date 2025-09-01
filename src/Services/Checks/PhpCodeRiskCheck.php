@@ -22,17 +22,41 @@ class PhpCodeRiskCheck
 
         foreach ($files as $file) {
             $content = file_get_contents($file);
+            $lines = explode("\n", $content);
 
-            if (preg_match('/DB::raw\(|->where\(.*\$_(GET|POST|REQUEST)/i', $content)) {
-                $issues[] = "Potential SQL Injection in: {$file}";
-            }
+            foreach ($lines as $lineNumber => $line) {
+                if (preg_match('/DB::raw\(|->where\(.*\$_(GET|POST|REQUEST)/i', $line)) {
+                    $issues[] = [
+                        'type' => 'SQL Injection Risk',
+                        'severity' => 'high',
+                        'message' => 'Potential SQL Injection vulnerability detected',
+                        'file' => str_replace($this->path . DIRECTORY_SEPARATOR, '', $file),
+                        'line' => $lineNumber + 1,
+                        'recommendation' => 'Use parameterized queries and avoid raw SQL with user input'
+                    ];
+                }
 
-            if (preg_match('/echo\s+\$_(GET|POST|REQUEST)/i', $content)) {
-                $issues[] = "Potential XSS (unescaped output) in: {$file}";
-            }
+                if (preg_match('/echo\s+\$_(GET|POST|REQUEST)/i', $line)) {
+                    $issues[] = [
+                        'type' => 'XSS Risk',
+                        'severity' => 'high',
+                        'message' => 'Potential XSS vulnerability (unescaped output)',
+                        'file' => str_replace($this->path . DIRECTORY_SEPARATOR, '', $file),
+                        'line' => $lineNumber + 1,
+                        'recommendation' => 'Use {{ }} in Blade templates or htmlspecialchars() to escape output'
+                    ];
+                }
 
-            if (preg_match('/include|require|include_once|require_once.*\$_/', $content)) {
-                $issues[] = "Dynamic include/require detected in: {$file}";
+                if (preg_match('/include|require|include_once|require_once.*\$_/', $line)) {
+                    $issues[] = [
+                        'type' => 'File Inclusion Risk',
+                        'severity' => 'medium',
+                        'message' => 'Dynamic include/require detected',
+                        'file' => str_replace($this->path . DIRECTORY_SEPARATOR, '', $file),
+                        'line' => $lineNumber + 1,
+                        'recommendation' => 'Avoid dynamic file inclusion with user input'
+                    ];
+                }
             }
         }
 
