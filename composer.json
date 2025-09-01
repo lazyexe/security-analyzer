@@ -13,7 +13,17 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "providers": [
+                "SecurityAnalyzer\\SecurityAnalyzerServiceProvider"
+            ]
         }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@php artisan vendor:publish --provider=\"SecurityAnalyzer\\SecurityAnalyzerServiceProvider\" --tag=config --force"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --provider=\"SecurityAnalyzer\\SecurityAnalyzerServiceProvider\" --tag=config --force"
+        ]
     }
 }

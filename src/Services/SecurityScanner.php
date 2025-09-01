@@ -49,7 +49,24 @@ class SecurityScanner
         }
 
         foreach ($checks as $check) {
-            $this->issues = array_merge($this->issues, $check->run());
+            $checkResults = $check->run();
+            
+            // Ensure all results are properly formatted
+            foreach ($checkResults as $result) {
+                if (is_string($result)) {
+                    // Convert old string format to new array format
+                    $this->issues[] = [
+                        'type' => 'Legacy Check',
+                        'severity' => 'medium',
+                        'message' => $result,
+                        'file' => 'unknown',
+                        'line' => 1,
+                        'recommendation' => 'Please review this issue manually'
+                    ];
+                } else {
+                    $this->issues[] = $result;
+                }
+            }
         }
 
         return $this->issues;

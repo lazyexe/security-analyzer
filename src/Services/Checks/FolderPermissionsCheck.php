@@ -21,7 +21,14 @@ class FolderPermissionsCheck
             if (is_dir($fullPath)) {
                 $perms = substr(sprintf('%o', fileperms($fullPath)), -4);
                 if ($perms === '0777' || $perms === '0666') {
-                    $issues[] = "Folder {$folder} has insecure permissions ({$perms})!";
+                    $issues[] = [
+                        'type' => 'Insecure Permissions',
+                        'severity' => 'medium',
+                        'message' => 'Folder has insecure permissions',
+                        'file' => $folder,
+                        'line' => 1,
+                        'recommendation' => "Change folder permissions from {$perms} to 0755 or more restrictive"
+                    ];
                 }
             }
         }

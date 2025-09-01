@@ -15,7 +15,14 @@ class EnvFileCheck
     {
         $issues = [];
         if (file_exists($this->path . '/.env')) {
-            $issues[] = 'Found .env file in project root!';
+            $issues[] = [
+                'type' => 'Environment File Exposure',
+                'severity' => 'critical',
+                'message' => 'Environment file found in project root',
+                'file' => '.env',
+                'line' => 1,
+                'recommendation' => 'Ensure .env file is not accessible via web and is properly protected'
+            ];
         }
         return $issues;
     }
