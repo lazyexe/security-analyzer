@@ -9,6 +9,17 @@ use SecurityAnalyzer\Services\Checks\FolderPermissionsCheck;
 use SecurityAnalyzer\Services\Checks\OutdatedPackagesCheck;
 use SecurityAnalyzer\Services\Checks\PhpCodeRiskCheck;
 use SecurityAnalyzer\Services\Checks\CsrfCheck;
+use SecurityAnalyzer\Services\Checks\ForceHttpsCheck;
+use SecurityAnalyzer\Services\Checks\CorsCheck;
+use SecurityAnalyzer\Services\Checks\RouteMiddlewareCheck;
+use SecurityAnalyzer\Services\Checks\ApiRateLimitingCheck;
+use SecurityAnalyzer\Services\Checks\GlobalThrottleCheck;
+use SecurityAnalyzer\Services\Checks\PasswordHashCheck;
+use SecurityAnalyzer\Services\Checks\AdminPanelExposureCheck;
+use SecurityAnalyzer\Services\Checks\StorageSymlinkCheck;
+use SecurityAnalyzer\Services\Checks\DirectoryIndexCheck;
+use SecurityAnalyzer\Services\Checks\BackupFileCheck;
+
 
 class SecurityScanner
 {
@@ -47,6 +58,46 @@ class SecurityScanner
         if ($config['checks']['csrf_check']) {
             $checks[] = new CsrfCheck($this->projectPath, $config['exclude_dirs']);
         }
+		
+		if ($config['checks']['force_https']) {
+			$checks[] = new ForceHttpsCheck($this->projectPath, $config['exclude_dirs']);
+		}
+
+		if ($config['checks']['cors_check']) {
+			$checks[] = new CorsCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['route_middleware']) {
+			$checks[] = new RouteMiddlewareCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['api_rate_limit']) {
+			$checks[] = new ApiRateLimitingCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['global_throttle']) {
+			$checks[] = new GlobalThrottleCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['password_hash']) {
+			$checks[] = new PasswordHashCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['admin_panel']) {
+			$checks[] = new AdminPanelExposureCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['storage_symlink']) {
+			$checks[] = new StorageSymlinkCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['directory_index']) {
+			$checks[] = new DirectoryIndexCheck($this->projectPath, $config['exclude_dirs']);
+		}
+		
+		if ($config['checks']['backup_file']) {
+			$checks[] = new BackupFileCheck($this->projectPath, $config['exclude_dirs']);
+		}
 
         foreach ($checks as $check) {
             $checkResults = $check->run();
