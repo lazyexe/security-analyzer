@@ -110,37 +110,70 @@ class SecurityAnalyzerInstaller
     }
 
     private function registerServiceProvider()
-    {
-        $configFile = $this->projectRoot . '/config/app.php';
-        
-        if (!file_exists($configFile)) {
-            echo "⚠️  config/app.php not found\n";
-            return;
-        }
-        
-        $config = file_get_contents($configFile);
-        $providerClass = 'SecurityAnalyzer\\SecurityAnalyzerServiceProvider::class';
-        
-        // Check if provider already registered
-        if (strpos($config, $providerClass) !== false) {
-            echo "📝 Service Provider already registered\n";
-            return;
-        }
-        
-        // Find the providers array and add our provider
-        $pattern = "/(\s*'providers'\s*=>\s*\[.*?)(\s*\],)/s";
-        
-        if (preg_match($pattern, $config, $matches)) {
-            $replacement = $matches[1] . "\n\n        // Security Analyzer\n        " . $providerClass . "," . $matches[2];
-            $config = preg_replace($pattern, $replacement, $config);
-            
-            file_put_contents($configFile, $config);
-            echo "📝 Service Provider registered in config/app.php\n";
-        } else {
-            echo "⚠️  Could not auto-register Service Provider. Please add manually:\n";
-            echo "   Add '" . $providerClass . "' to config/app.php providers array\n";
-        }
-    }
+	{
+		$providerClass = 'SecurityAnalyzer\\SecurityAnalyzerServiceProvider::class';
+
+		$configFile = $this->projectRoot . '/config/app.php';
+		if (file_exists($configFile)) {
+			$config = file_get_contents($configFile);
+
+			if (strpos($config, $providerClass) !== false) {
+				echo "📝 Service Provider already registered in config/app.php\n";
+				return;
+			}
+
+			$pattern = "/(\s*'providers'\s*=>\s*\[.*?)(\s*\],)/s";
+
+			if (preg_match($pattern, $config, $matches)) {
+				$replacement = $matches[1] . "\n\n        // Security Analyzer\n        " . $providerClass . "," . $matches[2];
+				$config = preg_replace($pattern, $replacement, $config);
+
+				file_put_contents($configFile, $config);
+				echo "📝 Service Provider registered in config/app.php\n";
+				return;
+			} else {
+				echo "⚠️ Could not auto-register in config/app.php, trying AppServiceProvider.php...\n";
+			}
+		} else {
+			echo "⚠️ config/app.php not found, trying AppServiceProvider.php...\n";
+		}
+
+		$providerFile = $this->projectRoot . '/app/Providers/AppServiceProvider.php';
+		if (!file_exists($providerFile)) {
+			echo "❌ AppServiceProvider.php not found\n";
+			return;
+		}
+
+		$content = file_get_contents($providerFile);
+
+		$useStatement = "use SecurityAnalyzer\\SecurityAnalyzerServiceProvider;";
+		if (strpos($content, $useStatement) === false) {
+			$content = preg_replace(
+				'/(use Illuminate\\\\Support\\\\ServiceProvider;)/',
+				"$1\n$useStatement",
+				$content,
+				1
+			);
+			echo "📝 Added use SecurityAnalyzer\\SecurityAnalyzerServiceProvider;\n";
+		} else {
+			echo "✅ Use statement already exists, skipped\n";
+		}
+
+		$registerLine = '$this->app->register(SecurityAnalyzerServiceProvider::class);';
+		if (strpos($content, $registerLine) === false) {
+			$content = preg_replace(
+				'/public function register\(\): void\s*\{\s*/',
+				"public function register(): void\n    {\n        // Register SecurityAnalyzer\n        $registerLine\n        ",
+				$content,
+				1
+			);
+			echo "📝 Registered SecurityAnalyzerServiceProvider in AppServiceProvider\n";
+		} else {
+			echo "✅ Service Provider already registered in AppServiceProvider, skipped\n";
+		}
+
+		file_put_contents($providerFile, $content);
+	}
 
     private function publishConfig()
     {

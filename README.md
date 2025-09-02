@@ -4,13 +4,23 @@
 
 Detects common security issues including:
 
-* 🔓 Exposed `.env` files
-* 🐛 Debug mode enabled / Missing APP_KEY
-* 📁 Sensitive files exposed
+* 🗝️ Exposed `.env` files
+* 🐞 Debug mode enabled / Missing APP\_KEY
+* 📂 Sensitive files exposed
 * 🔐 Unsafe folder permissions
 * 📦 Outdated packages with vulnerabilities
 * 💉 Potential SQL Injection & XSS
 * 🛡️ Missing CSRF protection
+* 🌐 Force HTTPS not enforced
+* 🚫 Insecure CORS policy
+* 🛠️ Route Middleware missing (admin/dashboard routes)
+* ⏱️ API Rate Limiting missing
+* ⚡ Global Throttle configuration missing
+* 🔑 Weak Password Hash Driver
+* 🏛️ Admin Panel exposure (`/telescope`, `/horizon`, `/administrator`, `/admin`)
+* 📁 Storage symlink invalid or misconfigured
+* 🔍 Directory index exposed
+* 💾 Backup files found in project root or public folder
 
 ---
 
@@ -29,6 +39,7 @@ php security-analyzer/install.php
 - Create the packages directory
 - Copy files to the right location
 - Update your composer.json
+- Registering SecurityAnalyzer
 - Run composer dump-autoload
 - Publish configuration files
 
@@ -98,6 +109,16 @@ return [
         'outdated_packages'  => false, // Disabled by default
         'php_code_risks'     => true,
         'csrf_check'         => true,
+		'force_https'         => true,
+		'cors_check'          => true,
+		'route_middleware'    => true,
+		'api_rate_limit'      => true,
+		'global_throttle'     => true,
+		'password_hash'       => true,
+		'admin_panel'         => true,
+		'storage_symlink'     => true,
+		'directory_index'     => true,
+		'backup_file'         => true,
     ],
 
     'exclude_dirs' => [

@@ -12,6 +12,16 @@ return [
         'outdated_packages'   => false,
         'php_code_risks'      => true,
         'csrf_check'          => true,
+		'force_https'         => true,
+		'cors_check'          => true,
+		'route_middleware'    => true,
+		'api_rate_limit'      => true,
+		'global_throttle'     => true,
+		'password_hash'       => true,
+		'admin_panel'         => true,
+		'storage_symlink'     => true,
+		'directory_index'     => true,
+		'backup_file'         => true,
     ],
 
     'exclude_dirs' => [
