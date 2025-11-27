@@ -34,6 +34,45 @@ return [
 
     "exclude_files" => ["*.log", "*.tmp"],
 
+    // load config added
+
+    "scoring" => [
+        "enabled" => true,
+        "cvss_version" => "3.1",
+        "include_temporal" => true,
+        "include_environmental" => false,
+    ],
+
+    "severity_thresholds" => [
+        "critical" => 9.0,
+        "high" => 7.0,
+        "medium" => 4.0,
+        "low" => 0.1,
+    ],
+
+    "data_flow" => [
+        "enabled" => true,
+        "max_depth" => 10,
+        "track_taint" => true,
+    ],
+
+    "ast_parsing" => [
+        "enabled" => true,
+        "parse_vendor" => false,
+    ],
+
+    "external_services" => [
+        "nvd_api" => true,
+        "github_advisories" => true,
+        "exploit_db" => false,
+    ],
+
+    "compliance" => [
+        "owasp_top_10" => true,
+        "pci_dss" => false,
+        "gdpr" => false,
+    ],
+
     "resources_thirdparty" => [
         "cvedata" => "https://services.nvd.nist.gov/rest/json/cves/2.0",
         "advisorygithub" => "https://api.github.com/advisories",

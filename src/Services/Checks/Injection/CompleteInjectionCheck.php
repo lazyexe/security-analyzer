@@ -317,3 +317,188 @@ class SqlInjectionCheck
         ];
     }
 }
+
+class NoSqlInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+
+        // MongoDB injection patterns
+        $patterns = [
+            '/\$where.*\$_(?:GET|POST|REQUEST)/' => 'MongoDB $where injection',
+            '/\[\'\$(?:ne|gt|lt|regex)\'\].*\$_/' =>
+                "MongoDB operator injection",
+            '/->where\(\[.*\$_(?:GET|POST)/' => "NoSQL query injection",
+        ];
+
+        foreach ($patterns as $pattern => $name) {
+            if (preg_match($pattern, $content, $matches)) {
+                $findings[] = $this->createFinding($name, $path, "CRITICAL");
+            }
+        }
+
+        return $findings;
+    }
+}
+
+class LdapInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+
+        $patterns = [
+            '/ldap_search\([^)]*\$(?!.*ldap_escape)/' =>
+                "LDAP search without escaping",
+            '/ldap_bind\([^)]*\$/' => "LDAP bind with user input",
+        ];
+
+        foreach ($patterns as $pattern => $name) {
+            if (preg_match($pattern, $content)) {
+                $findings[] = $this->createFinding($name, $path, "HIGH");
+            }
+        }
+
+        return $findings;
+    }
+}
+
+class XmlInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+
+        // XXE (XML External Entity) patterns
+        $patterns = [
+            '/simplexml_load_string\([^)]*\$(?!.*LIBXML_NOENT)/' =>
+                "XXE via simplexml_load_string",
+            '/DOMDocument.*loadXML\([^)]*\$/' => "XXE via DOMDocument::loadXML",
+            '/xml_parse\([^)]*\$/' => "XXE via xml_parse",
+        ];
+
+        // Check if external entity loading is disabled
+        if (!preg_match("/libxml_disable_entity_loader\(true\)/", $content)) {
+            $findings[] = $this->createFinding(
+                "External entity loader not disabled",
+                $path,
+                "HIGH",
+            );
+        }
+
+        foreach ($patterns as $pattern => $name) {
+            if (preg_match($pattern, $content)) {
+                $findings[] = $this->createFinding($name, $path, "HIGH");
+            }
+        }
+
+        return $findings;
+    }
+}
+
+class XPathInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+
+        if (preg_match('/->query\([^)]*\$/', $content)) {
+            $findings[] = $this->createFinding(
+                "XPath query with user input",
+                $path,
+                "HIGH",
+            );
+        }
+
+        return $findings;
+    }
+}
+
+class CommandInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+
+        $dangerousFunctions = [
+            "exec",
+            "shell_exec",
+            "system",
+            "passthru",
+            "proc_open",
+            "popen",
+            "pcntl_exec",
+        ];
+
+        foreach ($dangerousFunctions as $func) {
+            if (preg_match("/{$func}\s*\([^)]*\\\$/", $content)) {
+                if (!preg_match("/escapeshellarg|escapeshellcmd/", $content)) {
+                    $findings[] = $this->createFinding(
+                        "Command injection via {$func}()",
+                        $path,
+                        "CRITICAL",
+                    );
+                }
+            }
+        }
+
+        return $findings;
+    }
+}
+
+class CodeInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+
+        $patterns = [
+            '/eval\s*\([^)]*\$/' => "eval() with user input - CRITICAL",
+            "/create_function\s*\(/" =>
+                "create_function() is deprecated and dangerous",
+            '/assert\s*\([^)]*\$/' => "assert() with user input",
+            '/unserialize\s*\([^)]*\$_(?:GET|POST|REQUEST|COOKIE)/' =>
+                "Insecure deserialization",
+            "/preg_replace.*\/e/" =>
+                "preg_replace with /e modifier (code execution)",
+        ];
+
+        foreach ($patterns as $pattern => $name) {
+            if (preg_match($pattern, $content)) {
+                $findings[] = $this->createFinding($name, $path, "CRITICAL");
+            }
+        }
+
+        return $findings;
+    }
+}
+
+class TemplateInjectionCheck
+{
+    public function check(string $path): array
+    {
+        $findings = [];
+        $content = file_get_contents($path);
+        $patterns = [
+            '/\{\{.*\$_(?:GET|POST|REQUEST).*\}\}/' =>
+                "Template injection in Blade/Twig",
+            '/render\([^)]*\$_(?:GET|POST)/' =>
+                "Template render with user input",
+        ];
+
+        foreach ($patterns as $pattern => $name) {
+            if (preg_match($pattern, $content)) {
+                $findings[] = $this->createFinding($name, $path, "HIGH");
+            }
+        }
+
+        return $findings;
+    }
+}
