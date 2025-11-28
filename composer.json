@@ -1,29 +1,33 @@
 {
-    "name": "lazy-code/security-analyzer",
-    "description": "Laravel Security Analyzer - scan for common security issues",
-    "type": "library",
-    "require": {
-        "php": ">=8.2",
-        "illuminate/support": "^12.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "SecurityAnalyzer\\": "src/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "SecurityAnalyzer\\SecurityAnalyzerServiceProvider"
-            ]
-        }
-    },
-    "scripts": {
-        "post-install-cmd": [
-            "@php artisan vendor:publish --provider=\"SecurityAnalyzer\\SecurityAnalyzerServiceProvider\" --tag=config --force"
-        ],
-        "post-update-cmd": [
-            "@php artisan vendor:publish --provider=\"SecurityAnalyzer\\SecurityAnalyzerServiceProvider\" --tag=config --force"
-        ]
+  "name": "lazy-code/security-analyzer",
+  "description": "Laravel Security Analyzer - scan for common security issues",
+  "type": "library",
+  "require": {
+    "php": ">=8.2",
+    "illuminate/support": "^12.0",
+    "nikic/php-parser": "^4.15",
+    "guzzlehttp/guzzle": "^7.5",
+    "symfony/yaml": "^6.0",
+    "league/csv": "^9.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "SecurityAnalyzer\\": "src/"
     }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SecurityAnalyzer\\SecurityAnalyzerServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "@php artisan vendor:publish --provider=\"SecurityAnalyzer\\SecurityAnalyzerServiceProvider\" --tag=config --force"
+    ],
+    "post-update-cmd": [
+      "@php artisan vendor:publish --provider=\"SecurityAnalyzer\\SecurityAnalyzerServiceProvider\" --tag=config --force"
+    ]
+  }
 }
